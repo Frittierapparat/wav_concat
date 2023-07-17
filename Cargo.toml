@@ -11,8 +11,3 @@ name="wav_concat"
 path="src/lib.rs"
 crate-type= ["cdylib"]
 
-[[bin]]
-name="wav_concat"
-path="src/main.rs"
-[dependencies]
-clap = "4.3.12"

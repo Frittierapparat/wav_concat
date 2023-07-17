@@ -14,9 +14,6 @@ mod wav_concat{
     use std::fs::File;
     use std::io::{Read, Write};
 
-    
-
-    #[derive(Debug)]
     pub struct WAVHeaderData {
         chunk_id: String,
         chunk_size: u32,
@@ -60,11 +57,6 @@ mod wav_concat{
             data_begin: 0 
         };
 
-
-        /*let mut file = File::open(path).unwrap();
-        let mut buffer: Vec<u8> = vec![];
-        file.read_to_end(&mut buffer).unwrap();*/
-        //println!("{:?}", &buffer[0..=50]);
 
         let is_wav = &buffer[0..=3] == vec![0x52, 0x49, 0x46, 0x46] && &buffer[8..=15] == vec![0x57, 0x41,0x56,0x45,0x66, 0x6d, 0x74, 0x20];
 

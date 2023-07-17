@@ -124,7 +124,6 @@ pub mod wav_concat{
         let mut ref_file_buf: Vec<u8>= vec![];
         ref_file.read_to_end(&mut ref_file_buf).unwrap();
         let mut ref_file_header = get_wav_header(&ref_file_buf);
-        println!("Old ChunkSize: {:?}", ref_file_header.chunk_size); 
         if verify_wav_header(&ref_file_header){
             let mut file_checklist:Vec<bool> = vec![];
             let mut final_file_subchunk2_size: u32 = ref_file_header.subchunk2_size;
@@ -155,7 +154,6 @@ pub mod wav_concat{
             }
             ref_file_header.subchunk2_size = final_file_subchunk2_size;
             ref_file_header.chunk_size = final_file.len() as u32 -8;
-            println!("New ChunkSize: {:?}", ref_file_header.chunk_size);
             final_file = overwrite_wav_header(final_file, ref_file_header);
             let mut output_file_handle = File::create(output_file).unwrap();
             output_file_handle.write_all(&final_file).unwrap();

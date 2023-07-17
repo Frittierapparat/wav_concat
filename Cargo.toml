@@ -9,5 +9,5 @@ categories = ["audio"]
 [lib]
 name="wav_concat"
 path="src/lib.rs"
-crate-type= ["cdylib"]
+crate-type= ["rlib"]
 

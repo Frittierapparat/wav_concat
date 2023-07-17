@@ -1,6 +1,5 @@
 #![no_main]
 
-pub mod wav_concat{
     use std::fs::File;
     use std::io::{Read, Write};
 
@@ -194,4 +193,3 @@ pub mod wav_concat{
         temp_bytes.splice(index+4..=index+7, new_header_data.subchunk2_size.to_le_bytes());
         return temp_bytes;
     }
-}

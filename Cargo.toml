@@ -1,5 +1,5 @@
 [package]
-name = "wav-concat"
+name = "wav_concat"
 repository = "https://github.com/Frittierapparat/wav-concat"
 version = "1.0.0"
 edition = "2021"

@@ -10,7 +10,7 @@ fn main() {
 
 
 
-mod wav_concat{
+pub mod wav_concat{
     use std::fs::File;
     use std::io::{Read, Write};
 

@@ -1,7 +1,9 @@
 [package]
 name = "wav-concat"
-version = "0.1.0"
+repository = "https://github.com/Frittierapparat/wav-concat"
+version = "1.0.0"
 edition = "2021"
+keywords = ["audio", "codec", "wav", "wave", "concat"]
 
 [dependencies]
-clap = {version = "4.3.12", features = ["derive"]}
+clap = "4.3.12"

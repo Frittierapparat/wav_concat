@@ -21,7 +21,7 @@ pub mod wav_concat{
         data_begin: usize
     }
 
-    pub fn array_to_u32(array:[u8;4]) -> u32{
+    fn array_to_u32(array:[u8;4]) -> u32{
         return u32::from_ne_bytes(array);
     }
 

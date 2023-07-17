@@ -6,5 +6,10 @@ edition = "2021"
 keywords = ["audio", "codec", "wav", "wave", "concat"]
 categories = ["audio"]
 
+[lib]
+name="wav_concat"
+path="/src/main.rs/"
+crate-type= ["lib"]
+
 [dependencies]
 clap = "4.3.12"

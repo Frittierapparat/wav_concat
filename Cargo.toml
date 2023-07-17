@@ -1,6 +1,6 @@
 [package]
 name = "wav_concat"
-repository = "https://github.com/Frittierapparat/wav-concat"
+repository = "https://github.com/Frittierapparat/wav_concat"
 version = "1.0.0"
 edition = "2021"
 keywords = ["audio", "codec", "wav", "wave", "concat"]
@@ -9,7 +9,7 @@ categories = ["audio"]
 [lib]
 name="wav_concat"
 path="src/main.rs"
-crate-type= ["lib"]
+crate-type= ["cdylib"]
 
 [dependencies]
 clap = "4.3.12"

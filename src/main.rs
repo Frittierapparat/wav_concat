@@ -1,14 +1,4 @@
-use std::env;
-
-fn main() {
-    let mut args: Vec<String> = env::args().collect();
-    args.remove(0);
-    let output_file = args.remove(args.len()-1);
-
-    wav_concat::wav_concat(args, output_file)
-}
-
-
+#![no_main]
 
 pub mod wav_concat{
     use std::fs::File;

@@ -1,7 +1,7 @@
-#![no_main]
 pub mod wav_concat{
     use std::fs::File;
     use std::io::{Read, Write};
+    use std::vec;
 
     pub struct WAVHeaderData {
         chunk_id: String,
@@ -87,9 +87,9 @@ pub mod wav_concat{
 
     fn get_wav_header_from_file(path:String)->WAVHeaderData{
         let mut file = File::open(path).unwrap();
-        let mut buf:Vec<u8> = vec![];
-        file.read_to_end(&mut buf).unwrap();
-        return  get_wav_header(&buf);
+        let mut buf:[u8;100] = [0;100];
+        file.read(&mut buf).unwrap();
+        return  get_wav_header(&buf.to_vec());
     }
 
     pub fn verify_wav_header(header:&WAVHeaderData)->bool{
@@ -101,7 +101,7 @@ pub mod wav_concat{
         return check_list.into_iter().all(|x| x);
     }
 
-    pub fn verify_wav_header_compatibility(header:WAVHeaderData, reference:&WAVHeaderData)->bool{
+    pub fn verify_wav_header_compatibility(header:&WAVHeaderData, reference:&WAVHeaderData)->bool{
         let mut check_list:Vec<bool> = vec![];
 
         //Verify data in the new header is valid
@@ -120,45 +120,48 @@ pub mod wav_concat{
     }
 
     pub fn wav_concat(mut files:Vec<String>, output_file:String){
-        let mut ref_file = File::open(files.remove(0)).unwrap();
-        let mut ref_file_buf: Vec<u8>= vec![];
-        ref_file.read_to_end(&mut ref_file_buf).unwrap();
-        let mut ref_file_header = get_wav_header(&ref_file_buf);
-        if verify_wav_header(&ref_file_header){
-            let mut file_checklist:Vec<bool> = vec![];
-            let mut final_file_subchunk2_size: u32 = ref_file_header.subchunk2_size;
-            let mut final_file:Vec<u8> = vec![];
+        let ref_file_name = String::from(&files[0]);
+        let mut ref_file_header = get_wav_header_from_file(files.remove(0));
 
-            
-            ref_file.read_to_end(&mut ref_file_buf).unwrap();
-            final_file.append(&mut ref_file_buf);
-    
+        let mut final_subchunk2_size:u32 = 0;
+        let mut final_chunk_size: u32 = 0;
+
+        final_chunk_size += ref_file_header.chunk_size;
+        final_subchunk2_size += ref_file_header.subchunk2_size;
+
+        let mut file_checklist: Vec<bool> = vec![];
+        if verify_wav_header(&ref_file_header){
             for file in &files{
-            let file_header_data = get_wav_header_from_file(String::from(file));
-            let ref_data = &ref_file_header;
-            file_checklist.push(verify_wav_header_compatibility(file_header_data, ref_data));
-            }
-            if file_checklist.into_iter().all(|x| x){
-                for file in &files{
-                    let file_wav_header = get_wav_header_from_file(String::from(file));
-                    final_file_subchunk2_size = final_file_subchunk2_size + file_wav_header.subchunk2_size;
-                    let mut file_handle = File::open(file).unwrap();
-                    let mut buffer: Vec<u8> = vec![];
-                    file_handle.read_to_end(&mut buffer).unwrap();
-                    buffer = remove_wav_header(buffer, file_wav_header.data_begin);
-                    final_file.extend(buffer)
+                let header_data = get_wav_header_from_file(file.to_string());
+                if verify_wav_header_compatibility(&header_data, &ref_file_header){
+                    file_checklist.push(true);
+                    final_subchunk2_size += header_data.subchunk2_size;
+                    final_chunk_size += header_data.subchunk2_size;
+                }
+                else{
+                    file_checklist.push(false);
                 }
             }
-            else {
-                panic!("Files could not be verified as valid and compatible!")
+
+            if file_checklist.into_iter().all(|x| x){
+                ref_file_header.subchunk2_size = final_subchunk2_size;
+                ref_file_header.chunk_size = final_chunk_size;
+                let mut final_file = File::create(output_file).unwrap();
+                let mut ref_file: Vec<u8> = vec![];
+                File::open(ref_file_name).unwrap().read_to_end(&mut ref_file).unwrap();
+                final_file.write(&overwrite_wav_header(ref_file, ref_file_header)).unwrap();
+                for file in &files{
+                    let mut file_buf: Vec<u8> = vec![];
+                    File::open(file).unwrap().read_to_end(&mut file_buf).unwrap();
+                    let header = get_wav_header(&file_buf);
+                    final_file.write(&remove_wav_header(file_buf, header.data_begin)).unwrap();
+                }
             }
-            ref_file_header.subchunk2_size = final_file_subchunk2_size;
-            ref_file_header.chunk_size = final_file.len() as u32 -8;
-            final_file = overwrite_wav_header(final_file, ref_file_header);
-            let mut output_file_handle = File::create(output_file).unwrap();
-            output_file_handle.write_all(&final_file).unwrap();
         }
+
+
     }
+
 
     pub fn remove_wav_header(bytes:Vec<u8>, data_offset:usize)->Vec<u8>{
         return bytes[data_offset..].to_vec();

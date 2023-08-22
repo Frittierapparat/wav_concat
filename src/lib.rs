@@ -24,7 +24,7 @@ mod tests {
             file_pos_list.push(format!("/home/mia/Music/tmp000/{}", file))
         }
         println!("{:?}", file_pos_list);
-        wav_concat(file_pos_list, "result2.wav".to_string())
+        wav_concat(file_pos_list, "tmp.wav".to_string())
     }
 }
 
@@ -197,18 +197,8 @@ mod tests {
         temp_bytes.splice(28..=31, new_header_data.byte_rate.to_le_bytes());
         temp_bytes.splice(32..=33, new_header_data.block_align.to_le_bytes());
         temp_bytes.splice(34..=35, new_header_data.bits_per_sample.to_le_bytes());
-        let mut index:usize = 0;
-            for i in 0..bytes.len(){
-                if bytes[i..=i+3] == vec![0x64,0x61,0x74,0x61]{
-                    index = i;
-                    break;
-                }
-            }
-            if index == 0{
-                panic!("Beginning of Data not found!");
-            }
-        temp_bytes.splice(index..=index+3, new_header_data.subchunk2_id.into_bytes());
-        temp_bytes.splice(index+4..=index+7, new_header_data.subchunk2_size.to_le_bytes());
+        temp_bytes.splice(36..=39, new_header_data.subchunk2_id.into_bytes());
+        temp_bytes.splice(40..=43, new_header_data.subchunk2_size.to_le_bytes());
         return temp_bytes;
     }
 }

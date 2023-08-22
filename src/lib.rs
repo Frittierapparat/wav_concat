@@ -3,6 +3,31 @@ pub mod wav_concat{
     use std::io::{Read, Write};
     use std::vec;
 
+
+#[cfg(test)]
+mod tests {
+    use std::time::Instant;
+    use super::*;
+
+    #[test]
+    fn it_works() {
+        let file_list = [
+        "Track 10.wav", "Track 17.wav", "Track 23.wav", "Track 2.wav", "Track 7.wav", 
+        "Track 11.wav", "Track 18.wav", "Track 24.wav", "Track 30.wav", "Track 8.wav",
+        "Track 12.wav", "Track 19.wav", "Track 25.wav", "Track 31.wav", "Track 9.wav",
+        "Track 13.wav", "Track 1.wav", "Track 26.wav", "Track 3.wav", "Track 14.wav", 
+        "Track 20.wav", "Track 27.wav", "Track 4.wav", "Track 15.wav", "Track 21.wav", 
+        "Track 28.wav", "Track 5.wav", "Track 16.wav", "Track 22.wav", "Track 29.wav", 
+        "Track 6.wav"];
+        let mut file_pos_list: Vec<String> = vec![];
+        for file in file_list{
+            file_pos_list.push(format!("/home/mia/Music/tmp000/{}", file))
+        }
+        println!("{:?}", file_pos_list);
+        wav_concat(file_pos_list, "result2.wav".to_string())
+    }
+}
+
     pub struct WAVHeaderData {
         chunk_id: String,
         chunk_size: u32,
@@ -18,14 +43,6 @@ pub mod wav_concat{
         subchunk2_id: String,
         subchunk2_size: u32,
         data_begin: usize
-    }
-
-    fn array_to_u32(array:[u8;4]) -> u32{
-        return u32::from_ne_bytes(array);
-    }
-
-    pub fn array_to_u16(array:[u8;2])->u16{
-        return u16::from_ne_bytes(array);
     }
 
     pub fn get_wav_header(buffer:&Vec<u8>)->WAVHeaderData{
@@ -51,16 +68,16 @@ pub mod wav_concat{
 
         if is_wav{
             headers.chunk_id = String::from_utf8(buffer[0..=3].to_vec()).unwrap();
-            headers.chunk_size = array_to_u32(buffer[4..=7].try_into().unwrap());
+            headers.chunk_size = u32::from_le_bytes(buffer[4..=7].try_into().unwrap());
             headers.format = String::from_utf8(buffer[8..=11].to_vec()).unwrap();
             headers.subchunk1_id = String::from_utf8(buffer[12..=15].to_vec()).unwrap();
-            headers.subchunk1_size = array_to_u32(buffer[16..=19].try_into().unwrap());
-            headers.audio_format = array_to_u16(buffer[20..=21].try_into().unwrap());
-            headers.num_channels = array_to_u16(buffer[22..=23].try_into().unwrap());
-            headers.sample_rate = array_to_u32(buffer[24..=27].try_into().unwrap());
-            headers.byte_rate = array_to_u32(buffer[28..=31].try_into().unwrap());
-            headers.block_align = array_to_u16(buffer[32..=33].try_into().unwrap());
-            headers.bits_per_sample = array_to_u16(buffer[34..=35].try_into().unwrap());
+            headers.subchunk1_size = u32::from_le_bytes(buffer[16..=19].try_into().unwrap());
+            headers.audio_format = u16::from_le_bytes(buffer[20..=21].try_into().unwrap());
+            headers.num_channels = u16::from_le_bytes(buffer[22..=23].try_into().unwrap());
+            headers.sample_rate = u32::from_le_bytes(buffer[24..=27].try_into().unwrap());
+            headers.byte_rate = u32::from_le_bytes(buffer[28..=31].try_into().unwrap());
+            headers.block_align = u16::from_le_bytes(buffer[32..=33].try_into().unwrap());
+            headers.bits_per_sample = u16::from_le_bytes(buffer[34..=35].try_into().unwrap());
 
             let mut index:usize = 0;
             for i in 0..buffer.len(){
@@ -73,7 +90,7 @@ pub mod wav_concat{
                 panic!("Beginning of Data not found!");
             }
             headers.subchunk2_id = String::from_utf8(buffer[index..=index+3].to_vec()).unwrap();
-            headers.subchunk2_size = array_to_u32(buffer[index+4..=index+7].try_into().unwrap());
+            headers.subchunk2_size = u32::from_le_bytes(buffer[index+4..=index+7].try_into().unwrap());
 
             
             headers.data_begin = index+8;
